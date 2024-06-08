@@ -12,6 +12,12 @@ const TarefaSchema = new mongoose.Schema({
     usuario:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"Cliente",
+        require: true
+    },
+    colaborador:{
+        type: String,
+        ref:"Cliente",  
+        require: false
     },
     status:{
         type: String,

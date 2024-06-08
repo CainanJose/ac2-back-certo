@@ -1,4 +1,4 @@
-import userService from '../services/cliente.service.js'
+import userService from '../services/cliente.service.js';
 
 const createUsuario = async (req, res)=>{
     try {
@@ -60,6 +60,36 @@ const getAllUsuario = async (req, res)=>{
     }
 }
 
+const getContByCargo = async (req, res)=>{
+    try {
+        //SOLICITANDO AO SERVICE O GET DE TODOS OS USUARIOS
+        const usuarios = await userService.getAllService();
+
+        //VERIFICANDO SE A LISTA DE USUARIOS É MENOR QUE 1
+        if(usuarios.length < 1){
+            return res.status(400).send({menssagem: "Não há usuario cadastrado"});
+        }
+
+        const contCargos = {};
+        
+        usuarios.forEach(usuario => {
+            const cargo = usuario.cargo; // supondo que o campo do cargo é 'cargo'
+            if (contCargos[cargo]) {
+                contCargos[cargo]++;
+            } else {
+                contCargos[cargo] = 1;
+            }
+        });
+        
+
+        //RETORNANDO LISTA DE USUARIOS
+        res.send(contCargos);
+
+    } catch (error) {
+        //RETORNA ERRO CASO NÃO COSSIGA EXECUTAR O TRY
+        res.status(500).send({menssagem: error.message});
+    }
+}
 
 const getByIdCliente = async  (req, res)=>{
     const cliente = req.cliente;
@@ -127,10 +157,12 @@ const deleteUsuario = async (req, res)=>{
 
 }
 
+
 export default { 
     createUsuario,
     getAllUsuario,
     getByIdCliente,
     updateUsuario,
-    deleteUsuario
+    deleteUsuario,
+    getContByCargo
 };

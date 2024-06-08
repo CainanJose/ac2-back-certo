@@ -10,10 +10,13 @@ const updateService = (id,nome,sobrenome,email,cargo,senha,status)=> {
 
 const deleteService = (id)=>Cliente.findOneAndDelete({_id:id});
 
+const contByCargo = ()=>Cliente.aggregate([])
+
 export default {
     createService,
     getAllService,
     getByIdService,
     updateService,
-    deleteService
+    deleteService,
+    contByCargo,
 };

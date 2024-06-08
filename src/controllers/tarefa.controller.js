@@ -1,19 +1,25 @@
+import mongoose from 'mongoose';
 import tarefaService from '../services/tarefa.service.js';
 
 const createTarefa = async (req, res)=>{
-    const {titulo, descricao} = req.body;
+    const {titulo, descricao, colaborador} = req.body;
     const userId = req.userId;
 
     try {
 
         if(!titulo || !descricao){
-            res.status(400).send({menssagem: "preencha todos os campos para registro."})
+            return res.status(400).send({menssagem: "preencha todos os campos obrigatorios para registro."})
+        }
+
+        if(colaborador != "" && !mongoose.Types.ObjectId.isValid(colaborador)){
+            return res.status(400).send({menssagem: "preencha o colaborador com dados corretos para registro."})
         }
 
         await tarefaService.createService({
             titulo,
             descricao,
             usuario: userId,
+            colaborador
         })
 
         res.status(201).send({menssagem:"tarefa adicionada"});
@@ -42,7 +48,6 @@ const getAllTarefa = async(req, res)=>{
 const getByUserTarefa = async(req, res)=>{
     try {
         const id = req.userId;
-        console.log(id);
         const tarefas = await tarefaService.getByUserService(id);
 
         return res.send({tarefas});
@@ -53,7 +58,7 @@ const getByUserTarefa = async(req, res)=>{
 
 const updateTarefa = async(req, res)=>{
     try {
-        const {titulo, descricao, status} = req.body;
+        const {titulo, descricao, colaborador, status} = req.body;
         const {id} = req.params;
     
         if(!titulo && !descricao && !status){
@@ -62,7 +67,7 @@ const updateTarefa = async(req, res)=>{
     
         const tarefa = await tarefaService.getByIdService(id);
 
-        if(String(tarefa.usuario._id) != req.userId){
+        if(String(tarefa.usuario._id) != req.userId || String(tarefa.colaborador._id) != colaborador){
             return res.status(400).send({menssagem: "Voce não pode atualizar tarefas de outro usuario"});
         }
     
@@ -70,6 +75,7 @@ const updateTarefa = async(req, res)=>{
             id,
             titulo,
             descricao,
+            colaborador,
             status
         );
     
@@ -88,7 +94,7 @@ const deleteTarefa = async(req, res)=>{
         const tarefa = await tarefaService.getByIdService(id);
 
         //VERIFICANDO SE O USUARIO É DIVERENTE
-        if(String(tarefa.usuario._id) != req.userId){
+        if(String(tarefa.usuario._id) != req.userId || String(tarefa.colaborador._id) != colaborador){
             return res.status(400).send({menssagem: "Voce não pode deletar outro usuario"});
         }
 
@@ -101,11 +107,22 @@ const deleteTarefa = async(req, res)=>{
     }
 }
 
+const getAllNull = async(req, res)=>{
+    try {
+        const id = req.userId;
+        const tarefas = await tarefaService.getNullService();
+
+        return res.send({tarefas});
+    } catch (error) {
+        res.status(500).send({menssagem: error.message});
+    }
+}
 
 export default {
     createTarefa,
     getAllTarefa,
     getByUserTarefa,
     updateTarefa,
-    deleteTarefa
+    deleteTarefa,
+    getAllNull
 }
